@@ -1,90 +1,121 @@
-# Bubble Bobble Repair Lab
+# Bubble Bobble Repair Lab — Completed
 
-This project is a single-file Bubble Bobble-lite clone using **Pygame**. It introduces students to projectile-then-buoyant motion, trap-and-release enemy state, and combo scoring using a small, readable object-oriented codebase.
+Single-file Pygame Bubble Bobble clone, repaired and extended for the Software Engineering lab. The original code is kept in [`legacy/game_before.py`](legacy/game_before.py) so the “before” recording is reproducible; the finished game is [`game.py`](game.py).
 
----
+## Submission checklist
 
-## What's Provided
+| # | Required deliverable | File | Status |
+|---|---|---|---|
+| 1 | 10-second gameplay video **before** the changes, showing the bug | [`media/before.mp4`](media/before.mp4) | 10.0 s · 800×600 · H.264 · 300 frames |
+| 2 | 10-second gameplay video **after** the changes, showing the fix and new features | [`media/after.mp4`](media/after.mp4) | 10.0 s · 800×600 · H.264 · 300 frames |
+| 3 | Complete LLM chat history (the “Chat/LLM used page”) | [`docs/LLM_CHAT_LOG.md`](docs/LLM_CHAT_LOG.md) | Full transcript + [raw JSON export](docs/chat_export.json) |
 
-A working Bubble Bobble-lite game with:
+A one-page hand-in view is in [`SUBMISSION.md`](SUBMISSION.md). Technical write-up: [`docs/REPAIR_REPORT.md`](docs/REPAIR_REPORT.md).
 
-- A player that walks and jumps across a set of platforms and blows bubbles that travel forward before floating upward
-- Enemies that wander and occasionally jump, and can be trapped inside a bubble on contact
-- Popping a bubble containing a trapped enemy drops a fruit worth points, with combo bonuses for popping several bubbles in one airborne streak
-- Levels, lives, and scoring
+| Before: overlap, no trap | After: trapped + tint + fruit + 1UP |
+|---|---|
+| ![Before frame](media/before_poster.png) | ![After frame](media/after_poster.png) |
 
-It has **one deliberate bug** and **three optional features** left as empty functions. You are expected to **analyze**, **interact with an AI assistant**, and **complete/fix** the game to make it fully functional and more interesting.
+> **Share-page link:** the repository itself is the submission page. Once this folder is pushed, the permanent links are
+> `https://github.com/SETAPESU26/26_bubbleBobble/blob/main/media/before.mp4`,
+> `…/media/after.mp4`, and `…/docs/LLM_CHAT_LOG.md`.
+> If your course requires an external chat share URL, use the OpenCode session export in `docs/chat_export.json`; the Markdown transcript is the human-readable copy.
 
-### **Use an LLM (e.g. ChatGPT or Claude) as your debugging and pair-programming partner for this lab.**
+## What was completed
 
----
+| Task | Where | What changed |
+|---|---|---|
+| 1. Bubble-trapping bug | `trap_enemies` | `distance_squared_to(...) < 24 * 2` → `< 24 * 24`. The left side is a squared distance, so the threshold must be a squared radius. |
+| 2. `bubble_tint(bubble)` | module function | Trapped bubbles fade pink → amber → red and flash white in the last 2 seconds of their 8-second escape timer. Untrapped bubbles return `None` (default colour). |
+| 3. `on_fruit_collected(fruit)` | module function | Adds a 16-particle sparkle burst, increments the HUD **Fruit** counter, shows a floating `+value` popup, and plays a short runtime-generated chime. |
+| 4. `bonus_life_threshold()` | module function | Returns `5000`; one extra life is awarded whenever the score crosses a multiple of 5000. |
 
-## Getting Started
+Extra polish (does not change the required API): escape-timer bar under trapped bubbles, combo/level/1UP floating text, a fruit icon, an optional no-asset pickup chime, and a multi-threshold bonus-life loop.
 
-### Setup
+## Run the game
 
-1. Make sure you have Python 3.10+ installed.
-2. Install dependencies:
+Requires Python 3.10+ and Pygame.
 
 ```bash
-pip install pygame
-```
-
-3. Run the game:
-
-```bash
+python -m pip install -r requirements.txt     # pygame-ce; API-compatible with pygame
 python game.py
 ```
 
-**Controls:** Arrow keys to move, Up to jump, Space to blow a bubble, `R` to reset.
+On Python ≤ 3.13, `pip install pygame` also works. The reference recordings were made with Python 3.14 and `pygame-ce 2.5.8`.
 
+**Controls:** ←/→ move · ↑ jump · **Space** blow a bubble · **R** reset.
 
-## Tasks to Complete
+## Verify everything
 
-Each task must be completed using an iterative process involving LLM suggestions and your critical code review.
-
-### Task 1: Fix the bubble-trapping bug
-
-> A bubble is supposed to trap any enemy it touches shortly after being blown. In the current build, trapping only works on an almost pixel-perfect overlap between the bubble and the enemy, so bubbles that clearly brush past an enemy fail to trap it. The distance check in `trap_enemies` compares a *squared* distance against a threshold that was never squared to match it. Fix the threshold so the comparison is consistent.
-
-### Task 2: Implement `bubble_tint(bubble)`
-
-> Called once per bubble per frame in `draw`, as `color = bubble_tint(bubble) or ((120, 230, 255) if bubble.enemy is None else (255, 190, 230))`. It receives the `Bubble` object (check `bubble.enemy` to see whether it has a trapped enemy) and should return an `(r, g, b)` color, or `None` to keep the default. Idea: color bubbles by how close they are to expiring (`bubble.life`).
-
-### Task 3: Implement `on_fruit_collected(fruit)`
-
-> Called from `update()` the instant the player touches a fruit, right after its points are added and it's removed from play. It receives the `Fruit` that was collected. Its return value is ignored. Idea: a sparkle effect, or a running collected-fruit counter in the HUD.
-
-### Task 4: Implement `bonus_life_threshold()`
-
-> Called every frame in `update()`. It takes no arguments and should return an integer score value, or `None` to disable bonus lives entirely. Whenever the score crosses a multiple of that value for the first time, one life is awarded automatically — the bookkeeping (`self.bonus_awarded`) is already implemented, so you only need to choose the threshold. Idea: return `5000`.
-
----
-
-## Expected Behavior
-
-- Bubbles travel forward briefly before rising, and eventually float off the top of the screen if never popped
-- A bubble touching an enemy traps it inside; popping that bubble from above releases a fruit
-- Combo score for chained pops resets once the player lands back on a platform
-- A trapped enemy that isn't popped in time escapes and resumes wandering
-- Clearing every enemy on a level (with no unpopped trapped ones left) advances to the next level
-
----
-
-## Folder Structure
-
-```
-bubble_bobble/
-├── game.py
-└── README.md
+```bash
+python -m unittest discover -s tests -v
+python tools/verify_submission.py
 ```
 
----
+The suite has **14 checks** covering the squared-radius trap, tint interpolation/flash, fruit callback, 5000-point bonus, escapes, level advance and a draw smoke test. All 14 pass.
 
-## Submission Checklist
+## How the videos were made
 
-Submission is only the following three things:
+Both MP4s are generated from the real game loop, not screen-captured by hand:
 
-- [] A 10-second video of gameplay **before** your changes, showing the bug/broken behavior
-- [] A 10-second video of gameplay **after** your changes, showing the bug fixed and the new features working
-- [] The Chat/LLM used page link, with the complete chat history
+```bash
+python tools/record_demo.py --mode before --out media/before.mp4 --poster media/before_poster.png
+python tools/record_demo.py --mode after  --out media/after.mp4  --poster media/after_poster.png
+```
+
+The recorder seeds `random`, steps the simulation at 60 Hz, renders at 30 fps, and pipes raw RGB frames to ffmpeg. The “before” run loads the untouched `legacy/game_before.py`; the “after” run loads `game.py`. It also prints the observed trap count and final score/lives/fruit state as an assertion that the intended behaviour happened.
+
+### Video storyboard
+
+**Before — `media/before.mp4`**
+
+| Time | Shot |
+|---|---|
+| 0.0–0.9 s | Title: “BEFORE THE FIX”, original untouched build |
+| 0.9–3.6 s | Attempt 1: bubble brushes the enemy, red “NO TRAP” marker |
+| 3.6–6.3 s | Attempt 2: same input, same result |
+| 6.3–9.0 s | Attempt 3: same input, same result |
+| 9.0–10.0 s | Result card: **0 traps / 3 attempts**, `24 * 2` vs `24 * 24` |
+
+**After — `media/after.mp4`**
+
+| Time | Shot |
+|---|---|
+| 0.0–0.9 s | Title: “AFTER THE FIX”, corrected build |
+| 0.9–3.9 s | Same brush pass now traps the enemy (green “TRAPPED!” marker); the escape-timer bar appears |
+| 3.9–6.1 s | `bubble_tint()` showcase: three trapped bubbles start at 8 s / 5.5 s / 3.2 s remaining and tick down, fading and flashing |
+| 6.1–9.3 s | Jump-pop the bubble from above → fruit drops → collected: sparkles, `+100`, Fruit counter → 1, score crosses 5000 → **1UP!** |
+| 9.3–10.0 s | Completion card: 4/4 tasks |
+
+## Repository map
+
+```text
+26_bubbleBobble/
+├── game.py                    # completed game (submission build)
+├── legacy/
+│   ├── game_before.py         # exact original (bug preserved)
+│   └── README_before.md       # original lab brief
+├── media/
+│   ├── before.mp4             # required 10 s video, bug visible
+│   ├── after.mp4              # required 10 s video, fixed + features
+│   ├── before_poster.png
+│   └── after_poster.png
+├── docs/
+│   ├── REPAIR_REPORT.md       # root-cause analysis, design, tests
+│   ├── LLM_CHAT_LOG.md        # readable complete chat transcript
+│   ├── chat_export.json       # raw OpenCode session export
+│   └── game.diff              # original vs completed source
+├── tests/test_game.py         # 14 automated checks
+├── tools/
+│   ├── record_demo.py         # deterministic MP4 recorder
+│   ├── export_chat.py         # session JSON → Markdown
+│   ├── sanitize_chat.py       # redact local details before publishing
+│   └── verify_submission.py   # deliverable/content checker
+├── SUBMISSION.md              # the three deliverables in one page
+├── requirements.txt
+└── Makefile
+```
+
+## The bug in one line
+
+`Vector2.distance_squared_to()` returns **d²**. Comparing it to `24 * 2 = 48` only traps when `d < √48 ≈ 6.93 px`. Squaring the radius (`24 * 24 = 576`) makes the check `d < 24 px`, which matches a bubble visually brushing a 28 px enemy. The fix is one line; the tests pin the behaviour at 20 px (trap) and 30 px (no trap).
