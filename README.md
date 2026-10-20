@@ -16,10 +16,12 @@ A one-page hand-in view is in [`SUBMISSION.md`](SUBMISSION.md). Technical write-
 |---|---|
 | ![Before frame](media/before_poster.png) | ![After frame](media/after_poster.png) |
 
-> **Share-page link:** the repository itself is the submission page. Once this folder is pushed, the permanent links are
-> `https://github.com/SETAPESU26/26_bubbleBobble/blob/main/media/before.mp4`,
-> `…/media/after.mp4`, and `…/docs/LLM_CHAT_LOG.md`.
-> If your course requires an external chat share URL, use the OpenCode session export in `docs/chat_export.json`; the Markdown transcript is the human-readable copy.
+> **Repo page:** <https://github.com/TheNonConformist/26_bubbleBobble>
+> Permanent deliverable links:
+> <https://github.com/TheNonConformist/26_bubbleBobble/blob/main/media/before.mp4>,
+> <https://github.com/TheNonConformist/26_bubbleBobble/blob/main/media/after.mp4>, and
+> <https://github.com/TheNonConformist/26_bubbleBobble/blob/main/docs/LLM_CHAT_LOG.md>.
+> This is a fork of the course template `SETAPESU26/26_bubbleBobble`; the full transcript is committed in `docs/`.
 
 ## What was completed
 

@@ -2,7 +2,8 @@
 
 **Student:** ___________________________  
 **Student ID:** ___________________________  
-**Repository:** `26_bubbleBobble` (this folder)
+**GitHub repository:** <https://github.com/TheNonConformist/26_bubbleBobble>  
+**Local folder:** `26_bubbleBobble`
 
 This submission contains exactly the three requested items, plus the source and the scripts used to reproduce the evidence.
 
